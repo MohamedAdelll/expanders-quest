@@ -1,5 +1,190 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
+# Expanders Quest
+
+A scalable B2B platform built with [NestJS](https://nestjs.com/) for managing projects, vendors, and research, featuring robust JWT authentication and role-based access control.
+
+---
+
+## Table of Contents
+
+- [Setup](#setup)
+- [Database Schema Diagrams](#database-schema-diagrams)
+- [API Endpoints](#api-endpoints)
+- [Matching Formula](#matching-formula)
+- [Deployment](#deployment)
+- [Resources](#resources)
+
+---
+
+## Setup
+
+### Prerequisites
+
+- Node.js 18+ (recommended: Node 20+)
+- Docker & Docker Compose (for local DBs)
+- MySQL 8+
+- MongoDB 6+
+
+### Installation
+
+```bash
+# Clone the repo
+git clone https://github.com/mohamedadelll/expanders-quest.git
+cd expanders-quest
+
+# Install dependencies
+npm install
+
+# Copy and edit environment variables
+cp .env.example .env
+# Edit .env as needed
+
+# Start MySQL and MongoDB with Docker Compose
+docker-compose up -d
+
+# Run the app (dev mode)
+npm run start:dev
+```
+
+App runs on [http://localhost:3000](http://localhost:3000) by default.
+
+---
+
+## Database Schema Diagrams
+
+### MySQL (TypeORM Entities)
+
+#### User
+
+| id  | companyName | contactEmail | role | password      |
+| --- | ----------- | ------------ | ---- | ------------- |
+| PK  | string      | string       | enum | hashed string |
+
+#### Project
+
+| id  | client (FK) | country (FK) | servicesNeeded (M2M) | budget | status |
+| --- | ----------- | ------------ | -------------------- | ------ | ------ |
+
+#### Vendor
+
+| id  | name | countriesSupported (M2M) | servicesOffered (M2M) | rating | responseSlaHours | slaExpiredAt |
+| --- | ---- | ------------------------ | --------------------- | ------ | ---------------- | ------------ |
+
+#### Match
+
+| id  | project (FK) | vendor (FK) | score | createdAt |
+| --- | ------------ | ----------- | ----- | --------- |
+
+#### Service
+
+| id  | serviceName |
+| --- | ----------- |
+
+#### Country
+
+| code | name |
+| ---- | ---- |
+
+### MongoDB (Mongoose Schema)
+
+#### Research
+
+| projectId | title | content | tags[] |
+| --------- | ----- | ------- | ------ |
+
+---
+
+## API Endpoints
+
+### Auth
+
+- `POST /auth/login` — Login, returns JWT
+
+### Projects
+
+- `GET /projects/:id` — Get project (JWT required)
+- `POST /projects` — Create project (role: client or admin)
+- `PATCH /projects/:id` — Update project (owner only)
+- `DELETE /projects/:id` — Delete project (owner only)
+
+### Vendors
+
+- `GET /vendor` — List vendors (role: admin)
+- `POST /vendor` — Create vendor (role: admin)
+- `PATCH /vendor/:id` — Update vendor (role: admin)
+- `DELETE /vendor/:id` — Delete vendor (role: admin)
+
+### Research
+
+- `POST /research` — Create research doc
+- `GET /research` — Query research docs (by tag, text, project)
+
+### Matches
+
+- `GET /projects/:id/matches/rebuild` — Rebuild matches for a project
+
+### Analytics
+
+- `GET /analytics/top-vendors` — Top vendors per country, research doc counts
+
+---
+
+## Matching Formula
+
+The vendor-project matching score is calculated as:
+
+```
+score = (number of overlapping services) * 2
+      + vendor.rating
+      + SLA_weight
+```
+
+Where:
+
+- **SLA_weight**:
+  - 2 if `responseSlaHours <= 24`
+  - 1 if `responseSlaHours <= 72`
+  - 0 otherwise
+
+Only vendors supporting the project's country and at least one required service are considered.
+
+---
+
+## Deployment
+
+### Local Docker Compose
+
+```bash
+docker-compose up --build
+```
+
+### Production
+
+- Build the app: `npm run build`
+- Run: `npm run start:prod` or use Docker
+- Ensure environment variables are set (see `.env.example`)
+
+#### Example Docker Deployment
+
+```bash
+docker build -t expanders-quest .
+docker run --env-file .env -p 3333:3333 expanders-quest
+```
+
+---
+
+## Resources
+
+- [NestJS Documentation](https://docs.nestjs.com)
+- [TypeORM Docs](https://typeorm.io)
+- [Mongoose Docs](https://mongoosejs.com/docs/)
+- [Project Issues](https://github.com/your-org/expanders-quest/issues)
+
+---
+
+## License<p align="center">
+
+<a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
+
 </p>
 
 [circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
