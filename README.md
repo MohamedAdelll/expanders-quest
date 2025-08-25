@@ -172,15 +172,6 @@ docker run --env-file .env -p 3333:3333 expanders-quest
 
 ---
 
-## Resources
-
-- [NestJS Documentation](https://docs.nestjs.com)
-- [TypeORM Docs](https://typeorm.io)
-- [Mongoose Docs](https://mongoosejs.com/docs/)
-- [Project Issues](https://github.com/your-org/expanders-quest/issues)
-
----
-
 ## License<p align="center">
 
 <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
