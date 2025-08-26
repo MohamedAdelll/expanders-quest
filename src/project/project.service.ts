@@ -14,4 +14,10 @@ export class ProjectService {
       where: { status: ProjectStatus.ACTIVE },
     });
   }
+  async findByIdWithClient(id: number) {
+    return await this.projectRepo.findOne({
+      where: { id },
+      relations: ['client'],
+    });
+  }
 }

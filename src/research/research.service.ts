@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CreateResearchDto } from './dto/CreateResearch';
+import { CreateResearchDto } from './dto/createResearch';
 import { InjectModel } from '@nestjs/mongoose';
 import { MODEL_NAME, ResearchDocument } from './research.schema';
 import { Model } from 'mongoose';

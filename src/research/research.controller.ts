@@ -1,14 +1,7 @@
-import {
-  Body,
-  Controller,
-  Get,
-  ParseArrayPipe,
-  ParseIntPipe,
-  Post,
-  Query,
-} from '@nestjs/common';
-import { CreateResearchDto } from './dto/CreateResearch';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { ResearchService } from './research.service';
+import { CreateResearchDto } from './dto/createResearch';
+import { GetResearchFilterDto } from './dto/get-research-filter';
 
 @Controller('research')
 export class ResearchController {
@@ -20,15 +13,8 @@ export class ResearchController {
   }
 
   @Get()
-  async findAll(
-    @Query(
-      'tag',
-      new ParseArrayPipe({ items: String, separator: ',', optional: true }),
-    )
-    tag: string[],
-    @Query('text') text: string,
-    @Query('project', new ParseIntPipe({ optional: true })) project: number,
-  ) {
+  async findAll(@Query() getResearchFilter: GetResearchFilterDto) {
+    const { tag, text, project } = getResearchFilter;
     return await this.researchService.query(tag, text, project);
   }
 }
