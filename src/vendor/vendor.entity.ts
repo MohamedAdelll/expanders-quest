@@ -38,6 +38,11 @@ export class Vendor {
   @Column({ name: 'response_sla_hours', type: 'int', nullable: false })
   responseSlaHours: number;
 
-  @Column({ name: 'sla_expired_at', type: 'timestamp', nullable: true })
+  @Column({
+    name: 'sla_expired_at',
+    type: 'timestamp',
+    nullable: true,
+    default: null,
+  })
   slaExpiredAt: Date;
 }

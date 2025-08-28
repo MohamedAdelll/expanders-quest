@@ -65,6 +65,7 @@ export class AnalyticsService {
       ORDER BY ranked.country_code, ranked.rn;
       `,
     );
+    // [{country_code, vendor_id, name, avg_score, rn}, ...]
 
     // group into { [countryCode]: [{vendorId, name, avgScore}] }
     const topByCountry = new Map<
@@ -89,8 +90,8 @@ export class AnalyticsService {
         { $group: { _id: '$projectId', count: { $sum: 1 } } },
       ]);
 
-    const projectIds = docsByProject.map((d) => d._id);
-    const countryDocCount = new Map<string, number>();
+    const projectIds = docsByProject.map((p) => p._id);
+    const countryDocCount = new Map<string, number>(); // country_code -> count
 
     if (projectIds.length > 0) {
       // 2b) MySQL: map projectId -> country_code ONLY for active projects
@@ -99,18 +100,20 @@ export class AnalyticsService {
       const rows: Array<{ id: number; country_code: string }> =
         await this.dataSource.createQueryRunner().manager.query(
           `
-            SELECT id, country AS country_code
-            FROM projects
-            WHERE status = '${ProjectStatus.ACTIVE}' AND id IN ( ${projectIds.map(() => '?').join(', ')} )
-            `,
+        SELECT id, country AS country_code
+        FROM projects
+        WHERE status = '${ProjectStatus.ACTIVE}' AND id IN ( ${projectIds.map(() => '?').join(', ')} )
+        `,
           projectIds,
         );
+      // [{id, country_code}, ...] Which are active projects
 
       // quick lookup map: projectId -> country_code
       const pidToCountry = new Map<number, string>();
       for (const r of rows) pidToCountry.set(r.id, r.country_code);
 
       // fold doc counts into country totals (only active projects counted)
+
       for (const { _id: pid, count } of docsByProject) {
         const cc = pidToCountry.get(pid);
         if (!cc) continue; // not active or not found
